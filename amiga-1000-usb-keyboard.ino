@@ -13,7 +13,7 @@
 #endif
 
 #if ARDUINO_USB_MODE
-#error "This sketch should be used when USB is in OTG mode"
+#error "Please set: Tools > Setttings > USB Mode: USB-OTG (TinyUSB)"
 #endif
 
 #ifdef NEOPIXEL_NUM
