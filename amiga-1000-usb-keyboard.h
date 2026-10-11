@@ -53,11 +53,11 @@
 // #define PIN_AMIGA_KBDATA SDC
 
 #ifdef NEOPIXEL_NUM
-#define NEO_RED pixels.Color(20, 0, 0)
-#define NEO_GREEN pixels.Color(0, 20, 0)
-#define NEO_BLUE pixels.Color(0, 0, 20)
-#define NEO_PURPLE pixels.Color(20, 0, 20)
-#define NEO_YELLOW pixels.Color(20, 20, 0)
+#define NEO_RED pixels.Color(10, 0, 0)
+#define NEO_GREEN pixels.Color(0, 10, 0)
+#define NEO_BLUE pixels.Color(0, 0, 10)
+#define NEO_PURPLE pixels.Color(10, 0, 10)
+#define NEO_YELLOW pixels.Color(10, 5, 0)
 #define NEO_OFF pixels.Color(0, 0, 0)
 #endif
 
