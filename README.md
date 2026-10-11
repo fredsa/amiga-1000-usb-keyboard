@@ -40,7 +40,7 @@ and the ESP32-S3 dev board, through its onboard 5V -> 3.3V regulator.
 
 1. Install the [Arduino IDE](https://www.arduino.cc/en/software/).
 2. From the IDE, install the support library for your particular dev board.
-3. Update the `#define PIN_*` pin numbers in `amiga1000-keyboard-adapter.h`
+3. Update the `#define PIN_*` pin numbers in `amiga-1000-usb-keyboard.h`
    with any available pins on your dev board. Avoid pins on your devboard
    that are connected to onboard LEDs, are wired to other functions, or
    have pull up on pull down resistors hardwired on the board.
@@ -65,7 +65,7 @@ and the ESP32-S3 dev board, through its onboard 5V -> 3.3V regulator.
 ### ESP32-S3 dev board
 
 The number of pins that are broken out varies across different microcontroller dev boards.
-The specific pins you will use depens on what you specified in `amiga1000-keyboard-adapter.h`.
+The specific pins you will use depens on what you specified in `amiga-1000-usb-keyboard.h`.
 
 ## Wire connections
 

@@ -2,7 +2,7 @@
 #include <Adafruit_NeoPixel.h>
 #endif
 
-#include "amiga1000-keyboard-adapter.h"
+#include "amiga-1000-usb-keyboard.h"
 
 // https://github.com/tobozo/ESP32-USB-Soft-Host compatibility:
 // - Compiles with `esp32` Espressif Systems library version 2.0.17
