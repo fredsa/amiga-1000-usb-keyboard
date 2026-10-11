@@ -71,7 +71,7 @@ void setup() {
   Serial.flush();
 
 #ifdef PIN_NEOPIXEL
-  neo_color(NEO_YELLOW);
+  neo_color(NEO_GREEN);
 #endif
 }
 
