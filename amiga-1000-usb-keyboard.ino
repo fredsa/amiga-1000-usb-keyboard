@@ -1,8 +1,8 @@
-#ifdef NEOPIXEL_NUM
+#include "amiga-1000-usb-keyboard.h"
+
+#ifdef PIN_NEOPIXEL
 #include <Adafruit_NeoPixel.h>
 #endif
-
-#include "amiga-1000-usb-keyboard.h"
 
 // https://github.com/tobozo/ESP32-USB-Soft-Host compatibility:
 // - Compiles with `esp32` Espressif Systems library version 2.0.17
@@ -16,7 +16,7 @@
 #error "Please set: Tools > Setttings > USB Mode: USB-OTG (TinyUSB)"
 #endif
 
-#ifdef NEOPIXEL_NUM
+#ifdef PIN_NEOPIXEL
 Adafruit_NeoPixel pixels(NEOPIXEL_NUM, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 #endif
 
@@ -30,7 +30,7 @@ void setup() {
     delay(100);
   }
 
-#ifdef NEOPIXEL_NUM
+#ifdef PIN_NEOPIXEL
   // Configure neopixel.
   pixels.begin();
   neo_color(NEO_PURPLE);
@@ -70,7 +70,7 @@ void setup() {
   Serial.println("[AmigaUSB] Setup complete.");
   Serial.flush();
 
-#ifdef NEOPIXEL_NUM
+#ifdef PIN_NEOPIXEL
   neo_color(NEO_YELLOW);
 #endif
 }
@@ -79,7 +79,7 @@ void loop() {
   process_usb_keyboard_data();
 }
 
-#ifdef NEOPIXEL_NUM
+#ifdef PIN_NEOPIXEL
 void neo_color(uint32_t color) {
   pixels.setPixelColor(0, color);
   pixels.show();
@@ -210,7 +210,7 @@ void send_amiga_keycode(uint8_t amiga_keycode) {
     return;
   }
 
-#ifdef NEOPIXEL_NUM
+#ifdef PIN_NEOPIXEL
   neo_color(NEO_BLUE);
 #endif
   for (int i = 6; i >= 0; i--) {
@@ -234,7 +234,7 @@ void send_amiga_keycode(uint8_t amiga_keycode) {
 
 void set_syncd(bool state) {
   syncd = state;
-#ifdef NEOPIXEL_NUM
+#ifdef PIN_NEOPIXEL
   if (syncd) {
     neo_color(NEO_OFF);
   } else {

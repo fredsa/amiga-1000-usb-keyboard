@@ -18,15 +18,6 @@
 #define AMIGA_ACK_LOW_TIMEOUT_MS 145   // Slightly more than 143ms.
 #define AMIGA_ACK_HIGH_TIMEOUT_MS 100  // Aribitrary.
 
-#ifdef NEOPIXEL_NUM
-#define NEO_RED pixels.Color(20, 0, 0)
-#define NEO_GREEN pixels.Color(0, 20, 0)
-#define NEO_BLUE pixels.Color(0, 0, 20)
-#define NEO_PURPLE pixels.Color(20, 0, 20)
-#define NEO_YELLOW pixels.Color(20, 20, 0)
-#define NEO_OFF pixels.Color(0, 0, 0)
-#endif
-
 #define FORCE_TEMPLATED_NOPS
 
 // Amiga 1000 keyboard connector
@@ -51,6 +42,7 @@
 #define PIN_USB_DATA_PLUS 2   // USB Host Data+ Pin (must be an analog pin)
 #define PIN_AMIGA_KBCLK 19
 #define PIN_AMIGA_KBDATA 20
+#define NEOPIXEL_NUM 1
 
 // ** Have NOT gotten this to work on ESP32-S2! **
 // Adafruit QT Py ESP32-S2
@@ -59,6 +51,15 @@
 // #define PIN_USB_DATA_PLUS A3   // USB Host Data+ Pin (must be an analog pin)
 // #define PIN_AMIGA_KBCLK SDA
 // #define PIN_AMIGA_KBDATA SDC
+
+#ifdef NEOPIXEL_NUM
+#define NEO_RED pixels.Color(20, 0, 0)
+#define NEO_GREEN pixels.Color(0, 20, 0)
+#define NEO_BLUE pixels.Color(0, 0, 20)
+#define NEO_PURPLE pixels.Color(20, 0, 20)
+#define NEO_YELLOW pixels.Color(20, 20, 0)
+#define NEO_OFF pixels.Color(0, 0, 0)
+#endif
 
 
 const usb_pins_config_t USB_Pins_Config = {
