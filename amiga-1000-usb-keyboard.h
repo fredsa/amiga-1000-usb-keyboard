@@ -37,10 +37,20 @@
 
 // Adafruit ESP32-S3 TFT Feather
 // https://learn.adafruit.com/adafruit-esp32-s3-tft-feather
-#define PIN_USB_DATA_MINUS A4  // USB Host Data- Pin (must be an analog pin)
-#define PIN_USB_DATA_PLUS A5   // USB Host Data+ Pin (must be an analog pin)
-#define PIN_AMIGA_KBCLK T10
-#define PIN_AMIGA_KBDATA T11
+// #define PIN_USB_DATA_MINUS A4  // USB Host Data- Pin (must be an analog pin)
+// #define PIN_USB_DATA_PLUS A5   // USB Host Data+ Pin (must be an analog pin)
+// #define PIN_AMIGA_KBCLK T10
+// #define PIN_AMIGA_KBDATA T11
+
+// ESP32S3 Dev Module
+// Board URL: https://espressif.github.io/arduino-esp32/package_esp32_dev_index.json
+// - ESP32-S3-WROOM-1-N16R8
+// - 16MB Quad SPI Flash
+// - 8MB Octal SPI Flsh
+#define PIN_USB_DATA_MINUS 1  // USB Host Data- Pin (must be an analog pin)
+#define PIN_USB_DATA_PLUS 2   // USB Host Data+ Pin (must be an analog pin)
+#define PIN_AMIGA_KBCLK 19
+#define PIN_AMIGA_KBDATA 20
 
 // ** Have NOT gotten this to work on ESP32-S2! **
 // Adafruit QT Py ESP32-S2
