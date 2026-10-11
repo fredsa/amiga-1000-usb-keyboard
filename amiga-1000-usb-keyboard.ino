@@ -40,7 +40,7 @@ void setup() {
   // Match ESP32-S3 ROM boot messages: 115200 8N1
   Serial.begin(115200);
 
-  Serial.println("Settting up...");
+  Serial.println("[AmigaUSB] Settting up...");
   Serial.println();
 
   // Configure keyboard.
@@ -67,7 +67,7 @@ void setup() {
   USH.init(USB_Pins_Config, on_usb_keyboard_detect, on_usb_keyboard_data);
 
   // Setup complete.
-  Serial.println("Setup complete.");
+  Serial.println("[AmigaUSB] Setup complete.");
   Serial.flush();
 
 #ifdef NEOPIXEL_NUM
@@ -92,7 +92,8 @@ bool amiga_sync_up() {
   }
 
   print_uptime();
-  Serial.println("\nSyncing...");
+  Serial.println("[AmigaUSB]");
+  Serial.println("[AmigaUSB] Syncing...");
 
   // Limited attempts, so hard reset is checked regardless of sync state.
   unsigned long int count = 0;
@@ -103,12 +104,12 @@ bool amiga_sync_up() {
 
     wait_for_amiga_ack(true);
     if (syncd) {
-      Serial.printf("ACK received after %lu attempts.\n", count);
+      Serial.printf("[AmigaUSB] ACK received after %lu attempts.\n", count);
       return true;
     }
   }
 
-  Serial.printf("Still NO ack after %lu attempts.\n", count);
+  Serial.printf("[AmigaUSB] Still NO ack after %lu attempts.\n", count);
   return false;
 }
 
@@ -119,7 +120,7 @@ void wait_for_amiga_ack(bool debug) {
     int highafter = wait_for_state(PIN_AMIGA_KBDATA, HIGH, AMIGA_ACK_HIGH_TIMEOUT_MS * 1000);
     if (highafter != -1) {
       if (debug) {
-        Serial.printf("Got sync LOW after %i us, HIGH after %i us.\n", lowafter, highafter);
+        Serial.printf("[AmigaUSB] Got sync LOW after %i us, HIGH after %i us.\n", lowafter, highafter);
       }
       set_syncd(true);
       return;
@@ -151,7 +152,7 @@ void print_uptime() {
   unsigned long minutes = seconds / 60;
   unsigned long hours = minutes / 60;
 
-  Serial.printf("Uptime: %02lu:%02lu:%02lu", hours, minutes, seconds);
+  Serial.printf("[AmigaUSB] Uptime: %02lu:%02lu:%02lu", hours, minutes, seconds);
 }
 
 // Amiga Test Kit 1.21
@@ -205,7 +206,7 @@ void send_amiga_keycode_up_down(uint8_t amiga_keycode) {
 
 void send_amiga_keycode(uint8_t amiga_keycode) {
   if (!amiga_sync_up()) {
-    Serial.printf("ERROR: Failed to sync, dropping Amiga Keycode 0x%02X!\n", amiga_keycode);
+    Serial.printf("[AmigaUSB] ERROR: Failed to sync, dropping Amiga Keycode 0x%02X!\n", amiga_keycode);
     return;
   }
 
@@ -224,10 +225,10 @@ void send_amiga_keycode(uint8_t amiga_keycode) {
 
   wait_for_amiga_ack(false);
   if (syncd) {
-    Serial.printf("Sent Amiga 0x%02X, received ACK.\n", amiga_keycode);
+    Serial.printf("[AmigaUSB] Sent Amiga 0x%02X, received ACK.\n", amiga_keycode);
     return;
   } else {
-    Serial.printf("Sent Amiga 0x%02X, NO ACK! RETRYING...\n", amiga_keycode);
+    Serial.printf("[AmigaUSB] Sent Amiga 0x%02X, NO ACK! RETRYING...\n", amiga_keycode);
   }
 }
 
@@ -244,22 +245,22 @@ void set_syncd(bool state) {
 
 static void on_usb_keyboard_detect(uint8_t usbNum, void* dev) {
   sDevDesc* device = (sDevDesc*)dev;
-  Serial.printf("New device detected on USB#%d\n", usbNum);
-  Serial.printf("desc.bcdUSB             = 0x%04x\n", device->bcdUSB);
-  Serial.printf("desc.bDeviceClass       = 0x%02X\n", device->bDeviceClass);
-  Serial.printf("desc.bDeviceSubClass    = 0x%02X\n", device->bDeviceSubClass);
-  Serial.printf("desc.bDeviceProtocol    = 0x%02X\n", device->bDeviceProtocol);
-  Serial.printf("desc.bMaxPacketSize0    = 0x%02X\n", device->bMaxPacketSize0);
-  Serial.printf("desc.idVendor           = 0x%04x\n", device->idVendor);
-  Serial.printf("desc.idProduct          = 0x%04x\n", device->idProduct);
-  Serial.printf("desc.bcdDevice          = 0x%04x\n", device->bcdDevice);
-  Serial.printf("desc.iManufacturer      = 0x%02X\n", device->iManufacturer);
-  Serial.printf("desc.iProduct           = 0x%02X\n", device->iProduct);
-  Serial.printf("desc.iSerialNumber      = 0x%02X\n", device->iSerialNumber);
-  Serial.printf("desc.bNumConfigurations = 0x%02X\n", device->bNumConfigurations);
+  Serial.printf("[AmigaUSB] New device detected on USB#%d\n", usbNum);
+  Serial.printf("[AmigaUSB] desc.bcdUSB             = 0x%04x\n", device->bcdUSB);
+  Serial.printf("[AmigaUSB] desc.bDeviceClass       = 0x%02X\n", device->bDeviceClass);
+  Serial.printf("[AmigaUSB] desc.bDeviceSubClass    = 0x%02X\n", device->bDeviceSubClass);
+  Serial.printf("[AmigaUSB] desc.bDeviceProtocol    = 0x%02X\n", device->bDeviceProtocol);
+  Serial.printf("[AmigaUSB] desc.bMaxPacketSize0    = 0x%02X\n", device->bMaxPacketSize0);
+  Serial.printf("[AmigaUSB] desc.idVendor           = 0x%04x\n", device->idVendor);
+  Serial.printf("[AmigaUSB] desc.idProduct          = 0x%04x\n", device->idProduct);
+  Serial.printf("[AmigaUSB] desc.bcdDevice          = 0x%04x\n", device->bcdDevice);
+  Serial.printf("[AmigaUSB] desc.iManufacturer      = 0x%02X\n", device->iManufacturer);
+  Serial.printf("[AmigaUSB] desc.iProduct           = 0x%02X\n", device->iProduct);
+  Serial.printf("[AmigaUSB] desc.iSerialNumber      = 0x%02X\n", device->iSerialNumber);
+  Serial.printf("[AmigaUSB] desc.bNumConfigurations = 0x%02X\n", device->bNumConfigurations);
 
   if (!usb_dev_begun) {
-    Serial.println("Starting USB");
+    Serial.println("[AmigaUSB] Starting USB");
     Keyboard.begin();
     USB.begin();
   }
@@ -271,12 +272,12 @@ static void on_usb_keyboard_data(uint8_t usbNum, uint8_t byte_depth, uint8_t* da
   Keyboard.sendReport((KeyReport*)data);
 
   if (data_len != KEYBOARD_REPORT_SIZE) {
-    Serial.printf("ERROR: Received keyboard report of unexpected length: %i\n", data_len);
+    Serial.printf("[AmigaUSB] ERROR: Received keyboard report of unexpected length: %i\n", data_len);
     for (int k = 0; k < data_len; k++) {
-      if (k == 2) { Serial.printf(" "); }
-      Serial.printf("0x%02X ", data[k]);
+      if (k == 2) { Serial.printf("[AmigaUSB]  "); }
+      Serial.printf("[AmigaUSB] 0x%02X ", data[k]);
     }
-    Serial.printf("\n");
+    Serial.println("[AmigaUSB]");
     return;
   }
 
@@ -290,16 +291,16 @@ static void process_usb_keyboard_data() {
   }
 
 #ifdef DEBUG_USB_DATA
-  Serial.printf("process_usb_keyboard_data: ");
+  Serial.printf("[AmigaUSB] process_usb_keyboard_data: ");
   for (int k = 0; k < KEYBOARD_REPORT_SIZE; k++) {
-    if (k == 2) { Serial.printf(" "); }
-    Serial.printf("0x%02X ", data[k]);
+    if (k == 2) { Serial.printf("[AmigaUSB]  "); }
+    Serial.printf("[AmigaUSB] 0x%02X ", data[k]);
   }
-  Serial.printf("\n");
+  Serial.println("[AmigaUSB]");
 #endif
 
   if (data[2] == PC_KEYCODE_TOO_MANY_KEYS && data[3] == PC_KEYCODE_TOO_MANY_KEYS && data[4] == PC_KEYCODE_TOO_MANY_KEYS && data[5] == PC_KEYCODE_TOO_MANY_KEYS && data[6] == PC_KEYCODE_TOO_MANY_KEYS && data[7] == PC_KEYCODE_TOO_MANY_KEYS) {
-    Serial.printf("ERROR: Keyboard reports too many keys pressed\n");
+    Serial.printf("[AmigaUSB] ERROR: Keyboard reports too many keys pressed\n");
     return;
   }
 
@@ -330,17 +331,17 @@ static void process_usb_keyboard_data() {
   }
 
 #ifdef DEBUG_USB_DATA
-  Serial.printf("<< known pc_down_keys: ");
+  Serial.printf("[AmigaUSB] << known pc_down_keys: ");
   for (int i = 0; i < pc_down_keys_len; i++) {
     if (pc_down_keys[i]) {
-      Serial.printf("0x%02X ", i);
+      Serial.printf("[AmigaUSB] 0x%02X ", i);
     }
   }
-  Serial.printf("   usb_reported: ");
+  Serial.printf("[AmigaUSB]    usb_reported: ");
   for (int i = 0; i < usb_reported_len; i++) {
-    Serial.printf("0x%02X ", usb_reported[i]);
+    Serial.printf("[AmigaUSB] 0x%02X ", usb_reported[i]);
   }
-  Serial.printf("\n");
+  Serial.println("[AmigaUSB]");
 #endif
 
   // Process newly released keys.
@@ -376,14 +377,14 @@ static void process_usb_keyboard_data() {
   }
 
 #ifdef DEBUG_USB_DATA
-  Serial.printf(">> known pc_down_keys: ");
+  Serial.printf("[AmigaUSB] >> known pc_down_keys: ");
   for (int i = 0; i < pc_down_keys_len; i++) {
     if (pc_down_keys[i]) {
-      Serial.printf("0x%02X ", i);
+      Serial.printf("[AmigaUSB] 0x%02X ", i);
     }
   }
-  Serial.printf("\n");
-  Serial.printf("\n");
+  Serial.println("[AmigaUSB]");
+  Serial.println("[AmigaUSB]");
 #endif
 }
 
@@ -412,9 +413,9 @@ void send_pc_key_state_change(uint8_t pc_code, uint8_t amiga_down_up_mask) {
 // http://amigadev.elowar.com/read/ADCD_2.1/Hardware_Manual_guide/node0179.html
 void send_amiga_hard_reset(bool reset_keys_held) {
   if (reset_keys_held) {
-    Serial.printf("CTRL-Amiga-Amiga held, initiating hard reset...\n");
+    Serial.printf("[AmigaUSB] CTRL-Amiga-Amiga held, initiating hard reset...\n");
   } else {
-    Serial.printf("CTRL-Amiga-Amiga released.\n");
+    Serial.printf("[AmigaUSB] CTRL-Amiga-Amiga released.\n");
   }
   digitalWrite(PIN_AMIGA_KBCLK, reset_keys_held ? LOW : HIGH);
 }
