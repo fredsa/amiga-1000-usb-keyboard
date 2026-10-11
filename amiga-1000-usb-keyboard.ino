@@ -36,8 +36,9 @@ void setup() {
   neo_color(NEO_PURPLE);
 #endif
 
-  // Configure serial.
-  Serial.begin();
+  // Configure UART serial.
+  // Match ESP32-S3 ROM boot messages: 115200 8N1
+  Serial.begin(115200);
 
   Serial.println("Settting up...");
   Serial.println();
