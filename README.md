@@ -39,14 +39,23 @@ and the ESP32-S3 dev board, through its onboard 5V -> 3.3V regulator.
 ## Getting started
 
 1. Install the [Arduino IDE](https://www.arduino.cc/en/software/).
-2. From the IDE, install the support library for your particular dev board.
-3. Update the `#define PIN_*` pin numbers in `amiga-1000-usb-keyboard.h`
-   with any available pins on your dev board. Avoid pins on your devboard
-   that are connected to onboard LEDs, are wired to other functions, or
-   have pull up on pull down resistors hardwired on the board.
-4. Optionally modify `key_map.h` to your desired keyboard confiuguraton.
-4. Compile and push the build to the microcontroller.
-5. Solder up the connections to your USB keyboard and telephone handset cord.
+2. Install the `esp32` board platform by Espressif Systems (version 3.x) via the Boards Manager.
+3. If required for your board, add its Additional boards manager URL in
+   Preferences.
+4. Install the **EspUsbHost** library by TANAKA Masayuki via **Sketch > Include Library > Manage Libraries...**.
+5. Configure Arduino IDE **Tools** settings so that USB-OTG is not used by
+   settings:
+   - **Board**: select your board
+   - **USB Mode**: `USB-OTG (TinyUSB)`
+   - **USB CDC On Boot**: `Disabled`
+   - **Upload Mode**: `UART0 / Hardware CDC`
+6. Update the pin assignments in `amiga-1000-usb-keyboard.h`:
+   - **Amiga KBCLK**: `PIN_AMIGA_KBCLK`
+   - **Amiga KBDATA**: `PIN_AMIGA_KBDATA`
+7. Optionally modify `key_map.h` to your desired keyboard configuration.
+8. Compile and push the build to the microcontroller.
+9.  Connect your USB keyboard and solder up the connections to your telephone
+    handset cord.
 
 ## Pinouts
 
@@ -64,18 +73,22 @@ and the ESP32-S3 dev board, through its onboard 5V -> 3.3V regulator.
 
 ### ESP32-S3 dev board
 
-The number of pins that are broken out varies across different microcontroller dev boards.
-The specific pins you will use depens on what you specified in `amiga-1000-usb-keyboard.h`.
+ESP32-S3 native USB OTG Host is hardwired to the internal PHY:
+- **GPIO 19**: USB Host Data -
+- **GPIO 20**: USB Host Data +
+
+You can either wire the USB keyboard lines to GPIO 19 and GPIO 20, or simply plug the keyboard into the board's native USB-C port labeled **USB** using a USB-C to USB-A OTG adapter.
 
 ## Wire connections
 
 **WARNING**:
 
-**Never** connect your microcontroller to your Amiga AND another computer at the same time.
-Doing so can cause 5V power from one computer to backfeed into the other and damage it.
-To avoid accidents, condier placing a piece of tape over the dev board's USB connector.
+**Never** connect your microcontroller to your Amiga AND another computer at the
+same time. Doing so can cause 5V power from one computer to backfeed into the
+other and damage it. To avoid accidents, consider placing a piece of tape over
+the dev board's UART USB connector when attached to the Amiga.
 
-If you ever need to updated the software on the microcontroller:
+If you ever need to update the software on the microcontroller:
 1. UNPLUG the dev board from the Amiga 1000 Jack.
 2. Only then plug your dev board into your computer's USB port.
 3. Flash the microcontroller.
@@ -85,12 +98,14 @@ If you ever need to updated the software on the microcontroller:
 Now that you've read the above warning, here are the connections you will need to make:
 
 1. **Microcontroller `PIN_USB_DATA_MINUS`** to **USB keyboard Data -**
-2. **Microcontroller `PIN_USB_DATA_PLUS`** to **USB keyboard Data +**
-3. **Microcontroller `PIN_AMIGA_KBCLK`** to **Amiga Keyboard Clock**
-4. **Microcontroller `PIN_AMIGA_KBDATA`** to **Amiga Keybaord Data**
-5. **Microcontroller 5V** to **USB keyboard 5V** to **Amiga 5V**
-   - If your dev board does not have a separate 5V pin, then use its USB connector's 5V pin.
-6. **Microcontroller GND** to **USB keyboard GND** to **Amiga GND**
-   - Note, your microcontroller's GND pin is likely connected to its USB GND pin.
+   (or use onboard USB OTG port)
+3. **Microcontroller `PIN_USB_DATA_PLUS`** to **USB keyboard Data +**
+   (or use onboard USB OTG port)
+4. **Microcontroller `PIN_AMIGA_KBCLK`** to **Amiga Keyboard Clock**
+5. **Microcontroller `PIN_AMIGA_KBDATA`** to **Amiga Keyboard Data**
+6. **Microcontroller 5V** to **USB keyboard 5V** to **Amiga 5V**
+   - If your dev board does not have a separate 5V pin, use its USB connector's
+     5V pin.
+7. **Microcontroller GND** to **USB keyboard GND** to **Amiga GND**
 
 

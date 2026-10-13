@@ -1,8 +1,5 @@
-#include <ESP32-USB-Soft-Host.h>
+#include <EspUsbHost.h>
 #include <freertos/queue.h>
-
-#include "USB.h"
-#include "USBHIDKeyboard.h"
 
 #include "amiga.h"
 #include "pc.h"
@@ -18,39 +15,23 @@
 #define AMIGA_ACK_LOW_TIMEOUT_MS 145   // Slightly more than 143ms.
 #define AMIGA_ACK_HIGH_TIMEOUT_MS 100  // Aribitrary.
 
-#define FORCE_TEMPLATED_NOPS
-
 // Amiga 1000 keyboard connector
 // 1 Vcc (+5V)
 // 2 PIN_AMIGA_KBCLK
 // 3 PIN_AMIGA_KBDATA
 // 4 GND
 
-// Adafruit ESP32-S3 TFT Feather
-// https://learn.adafruit.com/adafruit-esp32-s3-tft-feather
-// #define PIN_USB_DATA_MINUS A4  // USB Host Data- Pin (must be an analog pin)
-// #define PIN_USB_DATA_PLUS A5   // USB Host Data+ Pin (must be an analog pin)
-// #define PIN_AMIGA_KBCLK T10
-// #define PIN_AMIGA_KBDATA T11
-
 // ESP32S3 Dev Module
 // Board URL: https://espressif.github.io/arduino-esp32/package_esp32_dev_index.json
 // - ESP32-S3-WROOM-1-N16R8
 // - 16MB Quad SPI Flash
-// - 8MB Octal SPI Flsh
-#define PIN_USB_DATA_MINUS 1  // USB Host Data- Pin (must be an analog pin)
-#define PIN_USB_DATA_PLUS 2   // USB Host Data+ Pin (must be an analog pin)
-#define PIN_AMIGA_KBCLK 19
-#define PIN_AMIGA_KBDATA 20
-#define NEOPIXEL_NUM 1
+// - 8MB Octal SPI Flash
+#define PIN_USB_DATA_MINUS 19  // ESP32-S3 hardwired
+#define PIN_USB_DATA_PLUS 20   // ESP32-S3 hardwired
+#define PIN_AMIGA_KBCLK 21     // Dealer's choice
+#define PIN_AMIGA_KBDATA 47    // Dealer's choice
+#define NEOPIXEL_NUM 1         // Onboard neo pixel
 
-// ** Have NOT gotten this to work on ESP32-S2! **
-// Adafruit QT Py ESP32-S2
-// https://learn.adafruit.com/adafruit-qt-py-esp32-s2
-// #define PIN_USB_DATA_MINUS A2  // USB Host Data- Pin (must be an analog pin)
-// #define PIN_USB_DATA_PLUS A3   // USB Host Data+ Pin (must be an analog pin)
-// #define PIN_AMIGA_KBCLK SDA
-// #define PIN_AMIGA_KBDATA SDC
 
 #ifdef NEOPIXEL_NUM
 #define NEO_RED pixels.Color(10, 0, 0)
@@ -61,22 +42,12 @@
 #define NEO_OFF pixels.Color(0, 0, 0)
 #endif
 
-
-const usb_pins_config_t USB_Pins_Config = {
-  PIN_USB_DATA_PLUS, PIN_USB_DATA_MINUS,
-  -1, -1,
-  -1, -1,
-  -1, -1
-};
-
-USBHIDKeyboard Keyboard;
+extern EspUsbHost usb;
 QueueHandle_t xQueue;
 
-static bool usb_dev_begun = false;
 static bool syncd = false;
 static bool capslock_on = false;
 static bool ctrl_amiga_amiga = false;
-static uint8_t keybd_dev_addr = 0xff;
 
 // Keep track of which keys are pressed down.
 static bool pc_down_keys[256];

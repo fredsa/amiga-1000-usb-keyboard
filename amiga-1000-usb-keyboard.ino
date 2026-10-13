@@ -4,21 +4,23 @@
 #include <Adafruit_NeoPixel.h>
 #endif
 
-// https://github.com/tobozo/ESP32-USB-Soft-Host compatibility:
-// - Compiles with `esp32` Espressif Systems library version 2.0.17
-// - Will not compile version 3.3.3
-
-#if !defined CONFIG_IDF_TARGET_ESP32S3 && !defined CONFIG_IDF_TARGET_ESP32S2
-#error "This sketch will only run on ESP32-S2 or ESP32-S3"
+#if ARDUINO_USB_MODE
+#error "Please set: Tools > USB Mode: \"USB-OTG (TinyUSB)\""
 #endif
 
-#if ARDUINO_USB_MODE
-#error "Please set: Tools > Setttings > USB Mode: USB-OTG (TinyUSB)"
+#if ARDUINO_USB_CDC_ON_BOOT
+#error "Please set: Tools > USB CDC On Boot: \"Disabled\""
 #endif
 
 #ifdef PIN_NEOPIXEL
 Adafruit_NeoPixel pixels(NEOPIXEL_NUM, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 #endif
+
+EspUsbHost usb;
+
+static void on_usb_device_connected(const EspUsbHostDeviceInfo &device);
+static void on_usb_device_disconnected(const EspUsbHostDeviceInfo &device);
+static void on_usb_hid_input(const EspUsbHostHIDInput &input);
 
 void setup() {
   // Blink main LED.
@@ -58,13 +60,14 @@ void setup() {
   digitalWrite(PIN_AMIGA_KBCLK, HIGH);
   digitalWrite(PIN_AMIGA_KBDATA, HIGH);
 
-  // Configure USB host.
-  USH.setOnConfigDescCB(Default_USB_ConfigDescCB);
-  USH.setOnIfaceDescCb(Default_USB_IfaceDescCb);
-  USH.setOnHIDDevDescCb(Default_USB_HIDDevDescCb);
-  USH.setOnEPDescCb(Default_USB_EPDescCb);
+  // Configure native USB host.
+  usb.onDeviceConnected(on_usb_device_connected);
+  usb.onDeviceDisconnected(on_usb_device_disconnected);
+  usb.onHIDInput(on_usb_hid_input);
 
-  USH.init(USB_Pins_Config, on_usb_keyboard_detect, on_usb_keyboard_data);
+  if (!usb.begin()) {
+    Serial.printf("[AmigaUSB] ERROR: usb.begin() failed: %s\n", usb.lastErrorName());
+  }
 
   // Setup complete.
   Serial.println("[AmigaUSB] Setup complete.");
@@ -243,50 +246,41 @@ void set_syncd(bool state) {
 #endif
 }
 
-static void on_usb_keyboard_detect(uint8_t usbNum, void* dev) {
-  sDevDesc* device = (sDevDesc*)dev;
-  Serial.printf("[AmigaUSB] New device detected on USB#%d\n", usbNum);
-  Serial.printf("[AmigaUSB] desc.bcdUSB             = 0x%04x\n", device->bcdUSB);
-  Serial.printf("[AmigaUSB] desc.bDeviceClass       = 0x%02X\n", device->bDeviceClass);
-  Serial.printf("[AmigaUSB] desc.bDeviceSubClass    = 0x%02X\n", device->bDeviceSubClass);
-  Serial.printf("[AmigaUSB] desc.bDeviceProtocol    = 0x%02X\n", device->bDeviceProtocol);
-  Serial.printf("[AmigaUSB] desc.bMaxPacketSize0    = 0x%02X\n", device->bMaxPacketSize0);
-  Serial.printf("[AmigaUSB] desc.idVendor           = 0x%04x\n", device->idVendor);
-  Serial.printf("[AmigaUSB] desc.idProduct          = 0x%04x\n", device->idProduct);
-  Serial.printf("[AmigaUSB] desc.bcdDevice          = 0x%04x\n", device->bcdDevice);
-  Serial.printf("[AmigaUSB] desc.iManufacturer      = 0x%02X\n", device->iManufacturer);
-  Serial.printf("[AmigaUSB] desc.iProduct           = 0x%02X\n", device->iProduct);
-  Serial.printf("[AmigaUSB] desc.iSerialNumber      = 0x%02X\n", device->iSerialNumber);
-  Serial.printf("[AmigaUSB] desc.bNumConfigurations = 0x%02X\n", device->bNumConfigurations);
-
-  if (!usb_dev_begun) {
-    Serial.println("[AmigaUSB] Starting USB");
-    Keyboard.begin();
-    USB.begin();
+static void on_usb_device_connected(const EspUsbHostDeviceInfo &device) {
+  Serial.printf("[AmigaUSB] New device detected on USB addr=%d\n", device.address);
+  Serial.printf("[AmigaUSB] VID: 0x%04X, PID: 0x%04X\n", device.vid, device.pid);
+  if (device.manufacturer && strlen(device.manufacturer) > 0) {
+    Serial.printf("[AmigaUSB] Manufacturer: %s\n", device.manufacturer);
   }
-  keybd_dev_addr = usbNum;
+  if (device.product && strlen(device.product) > 0) {
+    Serial.printf("[AmigaUSB] Product:      %s\n", device.product);
+  }
+  if (device.serial && strlen(device.serial) > 0) {
+    Serial.printf("[AmigaUSB] Serial:       %s\n", device.serial);
+  }
 }
 
-static void on_usb_keyboard_data(uint8_t usbNum, uint8_t byte_depth, uint8_t* data, uint8_t data_len) {
-  // Forward data to microcontroller USB bus.
-  Keyboard.sendReport((KeyReport*)data);
+static void on_usb_device_disconnected(const EspUsbHostDeviceInfo &device) {
+  Serial.printf("[AmigaUSB] Device disconnected (addr=%d)\n", device.address);
+}
 
-  if (data_len != KEYBOARD_REPORT_SIZE) {
-    Serial.printf("[AmigaUSB] ERROR: Received keyboard report of unexpected length: %i\n", data_len);
-    for (int k = 0; k < data_len; k++) {
-      if (k == 2) { Serial.printf("[AmigaUSB]  "); }
-      Serial.printf("[AmigaUSB] 0x%02X ", data[k]);
-    }
-    Serial.println("[AmigaUSB]");
-    return;
+static void on_usb_hid_input(const EspUsbHostHIDInput &input) {
+  if (input.length == KEYBOARD_REPORT_SIZE) {
+    xQueueSend(xQueue, input.data, 0);
+  } else if (input.length == KEYBOARD_REPORT_SIZE + 1 && input.data[0] == 1) {
+    // 8-byte report with 1-byte report ID prefix
+    xQueueSend(xQueue, &input.data[1], 0);
   }
-
-  xQueueSend(xQueue, data, 0);
+#ifdef DEBUG_USB_DATA
+  else {
+    Serial.printf("[AmigaUSB] Received non-standard HID report length: %d\n", input.length);
+  }
+#endif
 }
 
 static void process_usb_keyboard_data() {
   uint8_t data[KEYBOARD_REPORT_SIZE];
-  if (xQueueReceive(xQueue, &data, 0) != pdTRUE) {
+  if (xQueueReceive(xQueue, &data, 10 / portTICK_PERIOD_MS) != pdTRUE) {
     return;
   }
 
